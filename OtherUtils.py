@@ -5,9 +5,11 @@ import os
 import sys
 import logging
 
-def initPaths(model_path, log_path):
+def initPaths(model_path, log_path, remove_old=True):
     if not os.path.exists(model_path):
         os.system("mkdir %s" % model_path)
+    elif remove_old:
+        os.system("rm -rf %s/*" % model_path)
     # 训练日志
     train_log = log_path + "/train.log"
     # tensorboard日志

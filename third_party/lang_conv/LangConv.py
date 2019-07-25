@@ -9,12 +9,11 @@ try:
 except:
     pass
 
-try:
-    from zh_wiki import zh2Hant, zh2Hans
-except ImportError:
-    from zh_wiki import zh2Hant, zh2Hans
-
 import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+from zh_wiki import zh2Hant, zh2Hans
+
 py3k = sys.version_info >= (3, 0, 0)
 
 if py3k:

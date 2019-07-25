@@ -9,11 +9,14 @@
 """
 
 import sys
+import os
 import re
 import logging
 
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+
 from third_party.lang_conv.LangConv import LangConv
-from CommonLibs.FileIoUtils import MySentences
+from FileIoUtils import MySentences
 from third_party.vocabs import Vocab
 
 # 段落切分成多句的标点符号
@@ -76,7 +79,7 @@ class SplitParagraphToSent:
         self.__black_tags = [u"(已完成)"]
         self.__l2_tag_max_len = 8
         self.__l2_tag_min_len = 1
-        self.__split_puncs = re.compile("[%s]" % "".join(para_split_puncs).decode("utf-8"))
+        self.__split_puncs = re.compile("[%s]" % "".join(para_split_puncs))
 
     def split_para(self, paragraph):
         """
@@ -85,7 +88,7 @@ class SplitParagraphToSent:
             @Description:       段落切分
 
         """
-        sents = re.split(self.__split_puncs, paragraph.decode("utf-8"))
+        sents = re.split(self.__split_puncs, paragraph)
         results = []
         l2_tag = "NULL"
         for sent in sents:
@@ -122,8 +125,6 @@ class GenerateWordemb:
                 self.__embeddings[utf2uni(word)] = vec
 
     def get_word_emb(self, word, code="unicode"):
-        if code != "unicode":
-            word = word.decode(code)
         return self.__embeddings.get(word, [0.0 for i in xrange(self.__embedding_size)])
 
 
@@ -137,13 +138,13 @@ class CharHelper:
         self._vocab_size = 0
 
     def initialize(self):
-        self._char_list.append(self._unknown_char)
-        self._char2id[self._unknown_char] = 0
-        self._id2char['0'] = self._unknown_char
-
         self._char_list.append(self._padd_char)
-        self._char2id[self._padd_char] = 1
-        self._id2char['1'] = self._padd_char
+        self._char2id[self._padd_char] = 0
+        self._id2char['0'] = self._padd_char
+
+        self._char_list.append(self._unknown_char)
+        self._char2id[self._unknown_char] = 1
+        self._id2char['1'] = self._unknown_char
 
         for char_id, char in enumerate(Vocab.vocab):
             char_id += 2
@@ -174,7 +175,7 @@ if __name__ == "__main__":
     query_preprocess_handler = QueryPreprocess()
     para_handler = SplitParagraphToSent()
     content_id = 0
-    print "content_id\ttag_l1\ttag_l2\tsentence"
+    print("content_id\ttag_l1\ttag_l2\tsentence")
     for line in sys.stdin:
         content_id += 1
         try:
@@ -186,6 +187,6 @@ if __name__ == "__main__":
             line = query_preprocess_handler.parse(line)
             sents = para_handler.split_para(line)
             for sent in sents:
-                print "%d\t%s\t%s" % (content_id, tag_l1, sent)
+                print("%d\t%s\t%s" % (content_id, tag_l1, sent))
         except:
             continue
